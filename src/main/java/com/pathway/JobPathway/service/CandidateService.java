@@ -2,11 +2,14 @@ package com.pathway.JobPathway.service;
 
 import com.pathway.JobPathway.dto.*;
 import com.pathway.JobPathway.entity.User;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface CandidateService {
     CandidateProfileResponse getProfile(User user);
 
     CandidateProfileResponse updateProfile(User user, CandidateProfileUpdateRequest request);
+
+    String uploadResume(User user, MultipartFile file);
 
     EducationDTO addEducation(User user, EducationDTO dto);
 
