@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/candidate")
@@ -27,6 +30,16 @@ public class CandidateController {
             @AuthenticationPrincipal User user,
             @RequestBody CandidateProfileUpdateRequest request) {
         return ResponseEntity.ok(candidateService.updateProfile(user, request));
+    }
+
+    // ---- Resume ----
+
+    @PostMapping("/resume")
+    public ResponseEntity<Map<String, String>> uploadResume(
+            @AuthenticationPrincipal User user,
+            @RequestParam("file") MultipartFile file) {
+        String url = candidateService.uploadResume(user, file);
+        return ResponseEntity.ok(Map.of("url", url));
     }
 
     // ---- Education ----
