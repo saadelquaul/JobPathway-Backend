@@ -1,0 +1,11 @@
+target/
+.git/
+.gitignore
+.idea/
+.vscode/
+*.md
+*.iml
+.mvn/wrapper/maven-wrapper.jar
+uploads/
+JobPathway/
+JobPathway_Postman_Collection.json
