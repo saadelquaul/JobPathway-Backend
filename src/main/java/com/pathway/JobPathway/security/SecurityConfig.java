@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/resumes/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/job-offers/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/job-offers/**").hasRole("ADMIN")
@@ -45,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/applications/my-applications").hasRole("CANDIDATE")
                         .requestMatchers(HttpMethod.GET, "/api/applications/job-offer/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/applications/*/status").hasRole("ADMIN")
+                        .requestMatchers("/api/notifications/**").authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
