@@ -2,6 +2,7 @@ package com.pathway.JobPathway.service.impl;
 
 import com.pathway.JobPathway.dto.JobOfferRequest;
 import com.pathway.JobPathway.dto.JobOfferResponse;
+import com.pathway.JobPathway.dto.JobOfferStatusRequest;
 import com.pathway.JobPathway.dto.RequiredSkillDTO;
 import com.pathway.JobPathway.entity.JobOffer;
 import com.pathway.JobPathway.entity.RequiredSkill;
@@ -18,6 +19,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -73,10 +77,22 @@ public class JobOfferServiceImpl implements JobOfferService {
     }
 
     @Override
+    public Page<JobOfferResponse> getAllJobOffers(Pageable pageable) {
+        return jobOfferRepository.findAll(pageable)
+                .map(this::mapToResponse);
+    }
+
+    @Override
     public List<JobOfferResponse> getOpenJobOffers() {
         return jobOfferRepository.findByStatus(JobStatus.OPEN).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<JobOfferResponse> getOpenJobOffers(Pageable pageable) {
+        return jobOfferRepository.findByStatus(JobStatus.OPEN, pageable)
+                .map(this::mapToResponse);
     }
 
     @Override
@@ -107,6 +123,15 @@ public class JobOfferServiceImpl implements JobOfferService {
             }
         }
 
+        jobOfferRepository.save(jobOffer);
+        return mapToResponse(jobOffer);
+    }
+
+    @Override
+    public JobOfferResponse updateJobOfferStatus(Long id, JobOfferStatusRequest request) {
+        JobOffer jobOffer = jobOfferRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Job offer not found with id: " + id));
+        jobOffer.setStatus(request.getStatus());
         jobOfferRepository.save(jobOffer);
         return mapToResponse(jobOffer);
     }
