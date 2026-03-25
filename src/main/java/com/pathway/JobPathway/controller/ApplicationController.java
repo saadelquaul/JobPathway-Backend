@@ -6,12 +6,14 @@ import com.pathway.JobPathway.entity.User;
 import com.pathway.JobPathway.service.ApplicationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/applications")
@@ -27,14 +29,23 @@ public class ApplicationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(applicationService.applyForJob(user, jobOfferId));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApplicationResponse> getApplicationById(@PathVariable Long id) {
+        return ResponseEntity.ok(applicationService.getApplicationById(id));
+    }
+
     @GetMapping("/my-applications")
-    public ResponseEntity<List<ApplicationResponse>> getMyApplications(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(applicationService.getMyApplications(user));
+    public ResponseEntity<Page<ApplicationResponse>> getMyApplications(
+            @AuthenticationPrincipal User user,
+            @PageableDefault(size = 10, sort = "appliedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(applicationService.getMyApplications(user, pageable));
     }
 
     @GetMapping("/job-offer/{jobOfferId}")
-    public ResponseEntity<List<ApplicationResponse>> getApplicationsByJobOffer(@PathVariable Long jobOfferId) {
-        return ResponseEntity.ok(applicationService.getApplicationsByJobOffer(jobOfferId));
+    public ResponseEntity<Page<ApplicationResponse>> getApplicationsByJobOffer(
+            @PathVariable Long jobOfferId,
+            @PageableDefault(size = 10, sort = "appliedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(applicationService.getApplicationsByJobOffer(jobOfferId, pageable));
     }
 
     @PutMapping("/{id}/status")
