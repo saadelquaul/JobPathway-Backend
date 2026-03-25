@@ -2,16 +2,19 @@ package com.pathway.JobPathway.controller;
 
 import com.pathway.JobPathway.dto.JobOfferRequest;
 import com.pathway.JobPathway.dto.JobOfferResponse;
+import com.pathway.JobPathway.dto.JobOfferStatusRequest;
 import com.pathway.JobPathway.entity.User;
 import com.pathway.JobPathway.service.JobOfferService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/job-offers")
@@ -28,18 +31,27 @@ public class JobOfferController {
     }
 
     @GetMapping
-    public ResponseEntity<List<JobOfferResponse>> getAllJobOffers() {
-        return ResponseEntity.ok(jobOfferService.getAllJobOffers());
+    public ResponseEntity<Page<JobOfferResponse>> getAllJobOffers(
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(jobOfferService.getAllJobOffers(pageable));
     }
 
     @GetMapping("/open")
-    public ResponseEntity<List<JobOfferResponse>> getOpenJobOffers() {
-        return ResponseEntity.ok(jobOfferService.getOpenJobOffers());
+    public ResponseEntity<Page<JobOfferResponse>> getOpenJobOffers(
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(jobOfferService.getOpenJobOffers(pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<JobOfferResponse> getJobOfferById(@PathVariable Long id) {
         return ResponseEntity.ok(jobOfferService.getJobOfferById(id));
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<JobOfferResponse> updateJobOfferStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody JobOfferStatusRequest request) {
+        return ResponseEntity.ok(jobOfferService.updateJobOfferStatus(id, request));
     }
 
     @PutMapping("/{id}")
