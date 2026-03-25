@@ -6,16 +6,28 @@ import com.pathway.JobPathway.exception.ResourceNotFoundException;
 import com.pathway.JobPathway.repository.*;
 import com.pathway.JobPathway.service.CandidateService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CandidateServiceImpl implements CandidateService {
+
+    @Value("${file.upload-dir}")
+    private String uploadDir;
 
     private final CandidateRepository candidateRepository;
     private final EducationRepository educationRepository;
@@ -55,6 +67,43 @@ public class CandidateServiceImpl implements CandidateService {
 
         candidateRepository.save(candidate);
         return mapToProfileResponse(candidate);
+    }
+
+    // ---- Resume Upload ----
+
+    @Override
+    @Transactional
+    public String uploadResume(User user, MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.equals("application/pdf")) {
+            throw new IllegalArgumentException("Only PDF files are allowed");
+        }
+
+        try {
+            Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+            Files.createDirectories(uploadPath);
+
+            String filename = UUID.randomUUID() + "_" + file.getOriginalFilename()
+                    .replaceAll("[^a-zA-Z0-9._-]", "_");
+            Path targetPath = uploadPath.resolve(filename);
+            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+            String fileUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/resumes/")
+                    .path(filename)
+                    .toUriString();
+
+            Candidate candidate = getCandidateByUser(user);
+            candidate.setResumeUrl(fileUrl);
+            candidateRepository.save(candidate);
+
+            return fileUrl;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store resume file", e);
+        }
     }
 
     // ---- Education CRUD ----
