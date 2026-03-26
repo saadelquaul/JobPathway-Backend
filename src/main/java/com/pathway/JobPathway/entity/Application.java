@@ -38,4 +38,7 @@ public class Application {
     private LocalDateTime appliedAt = LocalDateTime.now();
 
     private LocalDateTime meetingDate;
+
+    @Column(length = 500)
+    private String meetingLink;
 }
