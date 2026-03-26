@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 @Service
 @RequiredArgsConstructor
 public class CandidateServiceImpl implements CandidateService {
@@ -39,6 +42,19 @@ public class CandidateServiceImpl implements CandidateService {
     public CandidateProfileResponse getProfile(User user) {
         Candidate candidate = getCandidateByUser(user);
         return mapToProfileResponse(candidate);
+    }
+
+    @Override
+    public CandidateProfileResponse getProfileById(Long candidateId) {
+        Candidate candidate = candidateRepository.findById(candidateId)
+                .orElseThrow(() -> new ResourceNotFoundException("Candidate not found with id: " + candidateId));
+        return mapToProfileResponse(candidate);
+    }
+
+    @Override
+    public Page<CandidateProfileResponse> getAllCandidates(Pageable pageable) {
+        return candidateRepository.findAll(pageable)
+                .map(this::mapToProfileResponse);
     }
 
     @Override
