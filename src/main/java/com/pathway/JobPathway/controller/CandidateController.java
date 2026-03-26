@@ -42,6 +42,14 @@ public class CandidateController {
         return ResponseEntity.ok(Map.of("url", url));
     }
 
+    @PostMapping("/profile-picture")
+    public ResponseEntity<Map<String, String>> uploadProfilePicture(
+            @AuthenticationPrincipal User user,
+            @RequestParam("file") MultipartFile file) {
+        String url = candidateService.uploadProfilePicture(user, file);
+        return ResponseEntity.ok(Map.of("url", url));
+    }
+
     // ---- Education ----
 
     @PostMapping("/education")
