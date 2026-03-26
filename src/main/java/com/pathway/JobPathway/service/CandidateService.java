@@ -2,10 +2,16 @@ package com.pathway.JobPathway.service;
 
 import com.pathway.JobPathway.dto.*;
 import com.pathway.JobPathway.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface CandidateService {
     CandidateProfileResponse getProfile(User user);
+
+    CandidateProfileResponse getProfileById(Long candidateId);
+
+    Page<CandidateProfileResponse> getAllCandidates(Pageable pageable);
 
     CandidateProfileResponse updateProfile(User user, CandidateProfileUpdateRequest request);
 
