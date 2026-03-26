@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "JobPathway API v1",
-    "description": "Postman collection for the JobPathway Backend Application endpoints.",
+    "name": "JobPathway API v2",
+    "description": "Complete Postman collection for the JobPathway Backend REST API. Includes all endpoints for Authentication, Candidate Profile Management, Job Offers, Applications, Admin User Management, and Notifications.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -13,17 +13,20 @@
     {
       "key": "admin_token",
       "value": "",
-      "type": "string"
+      "type": "string",
+      "description": "JWT token for admin user. Set after login."
     },
     {
       "key": "candidate_token",
       "value": "",
-      "type": "string"
+      "type": "string",
+      "description": "JWT token for candidate user. Set after login."
     }
   ],
   "item": [
     {
       "name": "01. Auth",
+      "description": "Authentication endpoints for user registration and login.",
       "item": [
         {
           "name": "Register Candidate",
@@ -37,23 +40,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"кандидат_john@test.com\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/register",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "register"
-              ]
-            }
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register a new candidate account. Returns JWT token on success."
           }
         },
         {
-          "name": "Login user (Admin/Candidate)",
+          "name": "Login (Admin)",
           "request": {
             "method": "POST",
             "header": [
@@ -68,35 +66,15 @@
             },
             "url": {
               "raw": "{{base_url}}/api/auth/login",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "02. Admin",
-      "item": [
-        {
-          "name": "Create new Admin",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{admin_token}}",
-                  "type": "string"
-                }
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
             },
+            "description": "Login as admin. Copy the token from response to admin_token variable."
+          }
+        },
+        {
+          "name": "Login (Candidate)",
+          "request": {
             "method": "POST",
             "header": [
               {
@@ -106,66 +84,45 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"newadmin@test.com\",\n  \"password\": \"password123\",\n  \"profilePicture\": \"https://example.com/pic.png\"\n}"
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/admin/create",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "admin",
-                "create"
-              ]
-            }
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login as candidate. Copy the token from response to candidate_token variable."
           }
         }
       ]
     },
     {
-      "name": "03. Candidate Profile",
+      "name": "02. Candidate Profile",
+      "description": "Endpoints for managing candidate profile, education, experience, skills, resume, and profile picture.",
       "item": [
         {
-          "name": "Get Profile",
+          "name": "Get My Profile",
           "request": {
             "auth": {
               "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{candidate_token}}",
-                  "type": "string"
-                }
-              ]
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
             },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/candidate/profile",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "candidate",
-                "profile"
-              ]
-            }
+              "host": ["{{base_url}}"],
+              "path": ["api", "candidate", "profile"]
+            },
+            "description": "Get the authenticated candidate's full profile including education, experience, and skills."
           }
         },
         {
-          "name": "Update Profile Info",
+          "name": "Update Profile",
           "request": {
             "auth": {
               "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{candidate_token}}",
-                  "type": "string"
-                }
-              ]
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
             },
             "method": "PUT",
             "header": [
@@ -176,19 +133,68 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Updated\",\n  \"resumeUrl\": \"https://aws.s3/my_resume.pdf\",\n  \"portfolioUrl\": \"https://github.com/johndoe\",\n  \"summary\": \"Experienced developer\",\n  \"profilePicture\": \"\",\n  \"password\": \"newpassword123\"\n}"
+              "raw": "{\n  \"phone\": \"+1234567890\",\n  \"location\": \"San Francisco, CA\",\n  \"bio\": \"Experienced software developer with 5 years of experience in Java and Spring Boot.\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/candidate/profile",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "candidate",
-                "profile"
+              "host": ["{{base_url}}"],
+              "path": ["api", "candidate", "profile"]
+            },
+            "description": "Update candidate profile information (phone, location, bio)."
+          }
+        },
+        {
+          "name": "Upload Resume",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "PDF file only, max 5MB"
+                }
               ]
-            }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/candidate/resume",
+              "host": ["{{base_url}}"],
+              "path": ["api", "candidate", "resume"]
+            },
+            "description": "Upload resume as PDF file. Max size: 5MB."
+          }
+        },
+        {
+          "name": "Upload Profile Picture",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "JPG or PNG only, max 2MB"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/candidate/profile-picture",
+              "host": ["{{base_url}}"],
+              "path": ["api", "candidate", "profile-picture"]
+            },
+            "description": "Upload profile picture. Allowed formats: JPG, PNG. Max size: 2MB."
           }
         },
         {
@@ -196,13 +202,7 @@
           "request": {
             "auth": {
               "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{candidate_token}}",
-                  "type": "string"
-                }
-              ]
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
             },
             "method": "POST",
             "header": [
@@ -213,19 +213,57 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"schoolName\": \"University of Test\",\n  \"degree\": \"Bachelor\",\n  \"field\": \"Computer Science\",\n  \"startDate\": \"2018-09-01\",\n  \"endDate\": \"2022-06-01\"\n}"
+              "raw": "{\n  \"institution\": \"Massachusetts Institute of Technology\",\n  \"degree\": \"Bachelor of Science\",\n  \"fieldOfStudy\": \"Computer Science\",\n  \"startDate\": \"2018-09-01\",\n  \"endDate\": \"2022-06-01\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/candidate/education",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "candidate",
-                "education"
-              ]
-            }
+              "host": ["{{base_url}}"],
+              "path": ["api", "candidate", "education"]
+            },
+            "description": "Add a new education entry to the candidate profile."
+          }
+        },
+        {
+          "name": "Update Education",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"institution\": \"MIT\",\n  \"degree\": \"Master of Science\",\n  \"fieldOfStudy\": \"Software Engineering\",\n  \"startDate\": \"2022-09-01\",\n  \"endDate\": \"2024-06-01\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/candidate/education/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "candidate", "education", "1"]
+            },
+            "description": "Update an existing education entry by ID."
+          }
+        },
+        {
+          "name": "Delete Education",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/candidate/education/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "candidate", "education", "1"]
+            },
+            "description": "Delete an education entry by ID."
           }
         },
         {
@@ -233,13 +271,7 @@
           "request": {
             "auth": {
               "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{candidate_token}}",
-                  "type": "string"
-                }
-              ]
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
             },
             "method": "POST",
             "header": [
@@ -250,19 +282,57 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Software Engineer\",\n  \"companyName\": \"Tech Corp\",\n  \"location\": \"Remote\",\n  \"startDate\": \"2022-07-01\",\n  \"isCurrent\": true,\n  \"description\": \"Worked on backend services.\"\n}"
+              "raw": "{\n  \"company\": \"Google\",\n  \"position\": \"Software Engineer\",\n  \"description\": \"Developed backend services using Java and Spring Boot. Led a team of 3 developers.\",\n  \"startDate\": \"2022-07-01\",\n  \"endDate\": null,\n  \"current\": true\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/candidate/experience",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "candidate",
-                "experience"
-              ]
-            }
+              "host": ["{{base_url}}"],
+              "path": ["api", "candidate", "experience"]
+            },
+            "description": "Add a new work experience entry. Set current=true and endDate=null for current job."
+          }
+        },
+        {
+          "name": "Update Experience",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company\": \"Google\",\n  \"position\": \"Senior Software Engineer\",\n  \"description\": \"Promoted to senior role. Leading backend architecture.\",\n  \"startDate\": \"2022-07-01\",\n  \"endDate\": null,\n  \"current\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/candidate/experience/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "candidate", "experience", "1"]
+            },
+            "description": "Update an existing experience entry by ID."
+          }
+        },
+        {
+          "name": "Delete Experience",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/candidate/experience/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "candidate", "experience", "1"]
+            },
+            "description": "Delete an experience entry by ID."
           }
         },
         {
@@ -270,13 +340,7 @@
           "request": {
             "auth": {
               "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{candidate_token}}",
-                  "type": "string"
-                }
-              ]
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
             },
             "method": "POST",
             "header": [
@@ -287,160 +351,232 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Java\",\n  \"level\": \"EXPERT\"\n}"
+              "raw": "{\n  \"skillName\": \"Java\",\n  \"level\": \"EXPERT\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/candidate/skills",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "candidate",
-                "skills"
-              ]
-            }
+              "host": ["{{base_url}}"],
+              "path": ["api", "candidate", "skills"]
+            },
+            "description": "Add a new skill. Levels: BEGINNER, INTERMEDIATE, ADVANCED, EXPERT."
+          }
+        },
+        {
+          "name": "Update Skill",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"skillName\": \"Spring Boot\",\n  \"level\": \"ADVANCED\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/candidate/skills/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "candidate", "skills", "1"]
+            },
+            "description": "Update an existing skill by ID."
+          }
+        },
+        {
+          "name": "Delete Skill",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/candidate/skills/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "candidate", "skills", "1"]
+            },
+            "description": "Delete a skill by ID."
           }
         }
       ]
     },
     {
-      "name": "04. Job Offers",
+      "name": "03. Job Offers",
+      "description": "Endpoints for managing job offers. Public endpoints for viewing, admin-only for create/update/delete.",
       "item": [
-        {
-          "name": "Create Job Offer",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{admin_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Backend Java Developer\",\n  \"description\": \"Looking for a strong Java dev...\",\n  \"type\": \"FULL_TIME\",\n  \"workModel\": \"REMOTE\",\n  \"salaryRange\": \"$80k - $120k\",\n  \"location\": \"World Wide\",\n  \"requiredSkills\": [\n    {\n      \"name\": \"Java\",\n      \"minimumLevel\": \"INTERMEDIATE\"\n    }\n  ]\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/job-offers",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "job-offers"
-              ]
-            }
-          }
-        },
         {
           "name": "Get All Job Offers",
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
+            "auth": {"type": "noauth"},
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/job-offers",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "job-offers"
+              "raw": "{{base_url}}/api/job-offers?page=0&size=10&sort=createdAt,desc",
+              "host": ["{{base_url}}"],
+              "path": ["api", "job-offers"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "10"},
+                {"key": "sort", "value": "createdAt,desc"}
               ]
-            }
+            },
+            "description": "Get all job offers (paginated). Public endpoint."
           }
         },
         {
           "name": "Get Open Job Offers",
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
+            "auth": {"type": "noauth"},
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/job-offers/open",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "job-offers",
-                "open"
+              "raw": "{{base_url}}/api/job-offers/open?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "job-offers", "open"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "10"}
               ]
-            }
+            },
+            "description": "Get only open (active) job offers. Public endpoint."
           }
         },
         {
           "name": "Get Job Offer by ID",
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
+            "auth": {"type": "noauth"},
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/job-offers/1",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "job-offers",
-                "1"
-              ]
-            }
+              "host": ["{{base_url}}"],
+              "path": ["api", "job-offers", "1"]
+            },
+            "description": "Get job offer details by ID. Public endpoint."
+          }
+        },
+        {
+          "name": "Create Job Offer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{admin_token}}", "type": "string"}]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Java Developer\",\n  \"description\": \"We are looking for an experienced Java developer to join our team. You will be responsible for building scalable backend services.\",\n  \"location\": \"New York, NY\",\n  \"minExperience\": 5,\n  \"salaryRange\": \"$120,000 - $150,000\",\n  \"workModel\": \"HYBRID\",\n  \"jobType\": \"FULL_TIME\",\n  \"requiredSkills\": [\n    {\n      \"skillName\": \"Java\",\n      \"minimumLevel\": \"ADVANCED\"\n    },\n    {\n      \"skillName\": \"Spring Boot\",\n      \"minimumLevel\": \"INTERMEDIATE\"\n    },\n    {\n      \"skillName\": \"PostgreSQL\",\n      \"minimumLevel\": \"INTERMEDIATE\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/job-offers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "job-offers"]
+            },
+            "description": "Create a new job offer. Admin only. WorkModel: ON_SITE, REMOTE, HYBRID. JobType: FULL_TIME, PART_TIME, CONTRACT, INTERNSHIP."
+          }
+        },
+        {
+          "name": "Update Job Offer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{admin_token}}", "type": "string"}]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Java Developer (Updated)\",\n  \"description\": \"Updated job description with more details.\",\n  \"location\": \"Remote\",\n  \"minExperience\": 4,\n  \"salaryRange\": \"$130,000 - $160,000\",\n  \"workModel\": \"REMOTE\",\n  \"jobType\": \"FULL_TIME\",\n  \"requiredSkills\": [\n    {\n      \"skillName\": \"Java\",\n      \"minimumLevel\": \"EXPERT\"\n    },\n    {\n      \"skillName\": \"Microservices\",\n      \"minimumLevel\": \"ADVANCED\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/job-offers/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "job-offers", "1"]
+            },
+            "description": "Update an existing job offer by ID. Admin only."
+          }
+        },
+        {
+          "name": "Update Job Offer Status",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{admin_token}}", "type": "string"}]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CLOSED\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/job-offers/1/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "job-offers", "1", "status"]
+            },
+            "description": "Update job offer status (OPEN or CLOSED). Admin only."
+          }
+        },
+        {
+          "name": "Delete Job Offer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{admin_token}}", "type": "string"}]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/job-offers/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "job-offers", "1"]
+            },
+            "description": "Delete a job offer by ID. Admin only."
           }
         }
       ]
     },
     {
-      "name": "05. Applications",
+      "name": "04. Applications",
+      "description": "Endpoints for managing job applications. Candidates can apply and view their applications. Admins can view all applications and update status.",
       "item": [
         {
-          "name": "Apply for Job Offer",
+          "name": "Apply for Job",
           "request": {
             "auth": {
               "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{candidate_token}}",
-                  "type": "string"
-                }
-              ]
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
             },
             "method": "POST",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
               "raw": "{{base_url}}/api/applications/apply/1",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "applications",
-                "apply",
-                "1"
-              ]
-            }
+              "host": ["{{base_url}}"],
+              "path": ["api", "applications", "apply", "1"]
+            },
+            "description": "Apply for a job offer. Candidate only. Cannot apply twice for same job."
           }
         },
         {
@@ -448,56 +584,58 @@
           "request": {
             "auth": {
               "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{candidate_token}}",
-                  "type": "string"
-                }
-              ]
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
             },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/applications/my-applications",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "applications",
-                "my-applications"
+              "raw": "{{base_url}}/api/applications/my-applications?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "applications", "my-applications"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "10"}
               ]
-            }
+            },
+            "description": "Get all applications submitted by the authenticated candidate."
           }
         },
         {
-          "name": "Get Applications By Job Offer",
+          "name": "Get Application by ID",
           "request": {
             "auth": {
               "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{admin_token}}",
-                  "type": "string"
-                }
-              ]
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
             },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/applications/job-offer/1",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "applications",
-                "job-offer",
-                "1"
+              "raw": "{{base_url}}/api/applications/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "applications", "1"]
+            },
+            "description": "Get application details by ID."
+          }
+        },
+        {
+          "name": "Get Applications by Job Offer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{admin_token}}", "type": "string"}]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/applications/job-offer/1?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "applications", "job-offer", "1"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "10"}
               ]
-            }
+            },
+            "description": "Get all applications for a specific job offer. Admin only."
           }
         },
         {
@@ -505,13 +643,7 @@
           "request": {
             "auth": {
               "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{admin_token}}",
-                  "type": "string"
-                }
-              ]
+              "bearer": [{"key": "token", "value": "{{admin_token}}", "type": "string"}]
             },
             "method": "PUT",
             "header": [
@@ -526,16 +658,287 @@
             },
             "url": {
               "raw": "{{base_url}}/api/applications/1/status",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "applications",
-                "1",
-                "status"
+              "host": ["{{base_url}}"],
+              "path": ["api", "applications", "1", "status"]
+            },
+            "description": "Update application status. Admin only. Status values: PENDING, IN_REVIEW, MEETING_SCHEDULED, REJECTED, APPROVED."
+          }
+        },
+        {
+          "name": "Schedule Meeting",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{admin_token}}", "type": "string"}]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"MEETING_SCHEDULED\",\n  \"meetingDate\": \"2026-04-15T10:00:00\",\n  \"meetingLink\": \"https://zoom.us/j/123456789?pwd=abc123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/applications/1/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "applications", "1", "status"]
+            },
+            "description": "Schedule a meeting/interview with candidate. Requires meetingDate and meetingLink. Candidate will receive real-time notification."
+          }
+        },
+        {
+          "name": "Reject Application",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{admin_token}}", "type": "string"}]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"REJECTED\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/applications/1/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "applications", "1", "status"]
+            },
+            "description": "Reject an application. Candidate will receive notification."
+          }
+        },
+        {
+          "name": "Approve Application",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{admin_token}}", "type": "string"}]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/applications/1/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "applications", "1", "status"]
+            },
+            "description": "Approve an application. Candidate will receive notification."
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Admin User Management",
+      "description": "Endpoints for admins to view and manage candidate users.",
+      "item": [
+        {
+          "name": "Get All Candidates",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{admin_token}}", "type": "string"}]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users?page=0&size=10&sort=id,desc",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "10"},
+                {"key": "sort", "value": "id,desc"}
               ]
-            }
+            },
+            "description": "Get all registered candidates (paginated). Admin only."
+          }
+        },
+        {
+          "name": "Get Candidate Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{admin_token}}", "type": "string"}]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/1/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", "1", "profile"]
+            },
+            "description": "Get a specific candidate's full profile by candidate ID. Admin only."
+          }
+        },
+        {
+          "name": "Get Candidate Applications",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{admin_token}}", "type": "string"}]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/1/applications?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", "1", "applications"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "10"}
+              ]
+            },
+            "description": "Get all applications submitted by a specific candidate. Admin only."
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Notifications",
+      "description": "Endpoints for managing user notifications. Both candidates and admins receive notifications for relevant events.",
+      "item": [
+        {
+          "name": "Get My Notifications",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/notifications?page=0&size=10&sort=createdAt,desc",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "10"},
+                {"key": "sort", "value": "createdAt,desc"}
+              ]
+            },
+            "description": "Get all notifications for the authenticated user (paginated)."
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/unread-count",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications", "unread-count"]
+            },
+            "description": "Get the count of unread notifications."
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
+            },
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/1/read",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications", "1", "read"]
+            },
+            "description": "Mark a specific notification as read."
+          }
+        },
+        {
+          "name": "Mark All as Read",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
+            },
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/mark-all-read",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications", "mark-all-read"]
+            },
+            "description": "Mark all notifications as read."
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{candidate_token}}", "type": "string"}]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications", "1"]
+            },
+            "description": "Delete a notification by ID."
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Static Files",
+      "description": "Endpoints for accessing uploaded files (resumes and profile pictures).",
+      "item": [
+        {
+          "name": "Get Resume",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{"key": "token", "value": "{{admin_token}}", "type": "string"}]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/resumes/uuid_resume.pdf",
+              "host": ["{{base_url}}"],
+              "path": ["resumes", "uuid_resume.pdf"]
+            },
+            "description": "Download a candidate's resume. Requires authentication."
+          }
+        },
+        {
+          "name": "Get Profile Picture",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/profiles/uuid_image.png",
+              "host": ["{{base_url}}"],
+              "path": ["profiles", "uuid_image.png"]
+            },
+            "description": "Get a user's profile picture. Public endpoint."
           }
         }
       ]
