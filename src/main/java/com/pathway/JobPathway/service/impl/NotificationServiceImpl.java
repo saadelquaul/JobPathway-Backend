@@ -10,6 +10,7 @@ import com.pathway.JobPathway.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.List;
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     @Transactional
@@ -38,6 +40,10 @@ public class NotificationServiceImpl implements NotificationService {
                 .build();
 
         notificationRepository.save(notification);
+
+        // Send real-time notification via WebSocket
+        NotificationResponse response = mapToResponse(notification);
+        messagingTemplate.convertAndSend("/topic/notifications/" + recipient.getId(), response);
     }
 
     @Override
