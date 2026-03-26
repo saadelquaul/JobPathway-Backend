@@ -22,5 +22,6 @@ public class ApplicationResponse {
     private ApplicationStatus status;
     private LocalDateTime appliedAt;
     private LocalDateTime meetingDate;
+    private String meetingLink;
     private String candidateResumeUrl;
 }
