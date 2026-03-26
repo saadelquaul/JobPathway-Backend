@@ -17,6 +17,8 @@ public interface CandidateService {
 
     String uploadResume(User user, MultipartFile file);
 
+    String uploadProfilePicture(User user, MultipartFile file);
+
     EducationDTO addEducation(User user, EducationDTO dto);
 
     EducationDTO updateEducation(User user, Long educationId, EducationDTO dto);
