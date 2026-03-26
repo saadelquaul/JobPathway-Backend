@@ -19,4 +19,6 @@ public class ApplicationStatusUpdateRequest {
     private ApplicationStatus status;
 
     private LocalDateTime meetingDate;
+
+    private String meetingLink;
 }
