@@ -981,13 +981,3 @@ JobPathway_Postman_Collection.json
 ```bash
 ./mvnw test
 ```
-
----
-
-## 📝 License
-
-This project is part of the JobPathway recruitment platform.
-
----
-
-Built with ❤️ using Spring Boot 4
