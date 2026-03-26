@@ -36,6 +36,7 @@ public class CandidateServiceImpl implements CandidateService {
     private final EducationRepository educationRepository;
     private final ExperienceRepository experienceRepository;
     private final CandidateSkillRepository candidateSkillRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -119,6 +120,48 @@ public class CandidateServiceImpl implements CandidateService {
             return fileUrl;
         } catch (IOException e) {
             throw new RuntimeException("Failed to store resume file", e);
+        }
+    }
+
+    // ---- Profile Picture Upload ----
+
+    @Override
+    @Transactional
+    public String uploadProfilePicture(User user, MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !(contentType.equals("image/jpeg") || 
+                contentType.equals("image/png") || contentType.equals("image/jpg"))) {
+            throw new IllegalArgumentException("Only JPG and PNG images are allowed");
+        }
+
+        // Check file size (2MB limit)
+        if (file.getSize() > 2 * 1024 * 1024) {
+            throw new IllegalArgumentException("File size must be less than 2MB");
+        }
+
+        try {
+            Path uploadPath = Paths.get(uploadDir, "profiles").toAbsolutePath().normalize();
+            Files.createDirectories(uploadPath);
+
+            String filename = UUID.randomUUID() + "_" + file.getOriginalFilename()
+                    .replaceAll("[^a-zA-Z0-9._-]", "_");
+            Path targetPath = uploadPath.resolve(filename);
+            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+            String fileUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/profiles/")
+                    .path(filename)
+                    .toUriString();
+
+            user.setProfilePicture(fileUrl);
+            userRepository.save(user);
+            
+            return fileUrl;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store profile picture", e);
         }
     }
 
