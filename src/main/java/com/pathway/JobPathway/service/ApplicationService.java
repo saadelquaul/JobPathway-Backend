@@ -16,5 +16,6 @@ public interface ApplicationService {
 
     List<ApplicationResponse> getApplicationsByJobOffer(Long jobOfferId);
     Page<ApplicationResponse> getApplicationsByJobOffer(Long jobOfferId, Pageable pageable);
+    Page<ApplicationResponse> getApplicationsByCandidateId(Long candidateId, Pageable pageable);
     ApplicationResponse updateApplicationStatus(Long applicationId, ApplicationStatusUpdateRequest request);
 }
