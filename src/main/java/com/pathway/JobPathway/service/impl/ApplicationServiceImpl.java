@@ -123,6 +123,15 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    public Page<ApplicationResponse> getApplicationsByCandidateId(Long candidateId, Pageable pageable) {
+        candidateRepository.findById(candidateId)
+                .orElseThrow(() -> new ResourceNotFoundException("Candidate not found with id: " + candidateId));
+
+        return applicationRepository.findByCandidateId(candidateId, pageable)
+                .map(this::mapToResponse);
+    }
+
+    @Override
     @Transactional
     public ApplicationResponse updateApplicationStatus(Long applicationId, ApplicationStatusUpdateRequest request) {
         Application application = applicationRepository.findById(applicationId)
@@ -135,6 +144,11 @@ public class ApplicationServiceImpl implements ApplicationService {
         application.setStatus(request.getStatus());
         if (request.getStatus() == ApplicationStatus.MEETING_SCHEDULED) {
             application.setMeetingDate(request.getMeetingDate());
+            application.setMeetingLink(request.getMeetingLink());
+        } else {
+            // Clear meeting details if status is changed away from MEETING_SCHEDULED
+            application.setMeetingDate(null);
+            application.setMeetingLink(null);
         }
 
         applicationRepository.save(application);
@@ -176,9 +190,17 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     private String buildNotificationMessage(Application application, ApplicationStatus status) {
         String jobTitle = application.getJobOffer().getTitle();
+        String meetingLink = application.getMeetingLink();
+        
         return switch (status) {
             case IN_REVIEW -> "Your application for \"" + jobTitle + "\" is now under review.";
-            case MEETING_SCHEDULED -> "An interview has been scheduled for your application to \"" + jobTitle + "\".";
+            case MEETING_SCHEDULED -> {
+                String msg = "An interview has been scheduled for your application to \"" + jobTitle + "\".";
+                if (meetingLink != null && !meetingLink.isEmpty()) {
+                    msg += " Meeting link: " + meetingLink;
+                }
+                yield msg;
+            }
             case APPROVED -> "Congratulations! Your application for \"" + jobTitle + "\" has been approved.";
             case REJECTED -> "Your application for \"" + jobTitle + "\" has been rejected.";
             default -> "Your application for \"" + jobTitle + "\" status has been updated to " + status + ".";
@@ -196,6 +218,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .status(application.getStatus())
                 .appliedAt(application.getAppliedAt())
                 .meetingDate(application.getMeetingDate())
+                .meetingLink(application.getMeetingLink())
                 .candidateResumeUrl(
                         candidateRepository.findById(application.getCandidate().getId()).get().getResumeUrl())
                 .build();
