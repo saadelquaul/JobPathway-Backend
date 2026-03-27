@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/resumes/**").permitAll()
                         .requestMatchers("/profiles/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/job-offers/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/job-offers/**").hasRole("ADMIN")
